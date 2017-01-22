@@ -98,32 +98,182 @@ public class SteeringBehaviours {
     
     private float _minDetectionBoxLength = 2f;
     private float _boxLength;
-    private Transform _closestIntersectingObstacle;
-    private float _distToClosestObstacle;
+    private SteeringObstacle _closestIntersectingObstacle;
+    private float _distToClosestIntersectionPoint;
     private Vector3 _localPosOfClosestObstacle;
-    private Vector3 _localPosition;
-    public Vector3 ObstacleAvoidance(Transform[] obstacles)
+    private Vector3 _circleLocalPosition;
+    private float _expandedRadius;
+    private float _intersectionSqrt;
+    private float _intersectionPoint;
+    private Vector3 _steeringForce;
+    private float _steeringForceMultiplier;
+    private float _brakingWeight = 0.2f;
+    public Vector3 ObstacleAvoidance(ref SteeringObstacle[] obstacles)
     {
         _boxLength = _minDetectionBoxLength + (_vehicle.Speed / _vehicle.MaxSpeed) * _minDetectionBoxLength;
 
-        //Insert method of tagging obstacles in the range of the box
+        //Tag obstacles in the range of the box
+        _vehicle.ObstacleManagerReference.TagObstaclesWithinRange(_vehicle, _boxLength);
 
         _closestIntersectingObstacle = null;
-        _distToClosestObstacle = float.MaxValue;
+        _distToClosestIntersectionPoint = float.MaxValue;
         _localPosOfClosestObstacle = Vector3.zero;
 
         for (int i = 0; i < obstacles.Length; i++)
         {
             //Check if obstacle is tagged, only consider when it is
-
-            _localPosition = _vehicle.transform.InverseTransformPoint(obstacles[i].position);
-            _localPosition.y = _vehicle.transform.position.y;
-            if(_localPosition.z >= 0f)
+            if(obstacles[i].TaggedForAvoidance)
             {
-                //Check if obstacle and vehicle could be intersecting
+                _circleLocalPosition = _vehicle.transform.InverseTransformPoint(obstacles[i].Position);
+                _circleLocalPosition.y = _vehicle.transform.position.y;
+                if (_circleLocalPosition.z >= 0f)
+                {
+                    //Check if obstacle and vehicle could be intersecting
+                    _expandedRadius = obstacles[i].Radius + _vehicle.Radius;
+                    if(Mathf.Abs(_circleLocalPosition.x) < _expandedRadius && Mathf.Abs(_circleLocalPosition.y) < _expandedRadius)
+                    {
+                        //Perform a line/circle intersection test. Intersection points are given by formula x = circleX +/- sqrt(radius^2 - circleZ^2) for y = 0.
+                        _intersectionSqrt = Mathf.Sqrt(_expandedRadius * _expandedRadius - _circleLocalPosition.x * _circleLocalPosition.x);
+
+                        _intersectionPoint = _circleLocalPosition.z - _intersectionSqrt;
+                        if(_intersectionPoint <= 0f)
+                        {
+                            _intersectionPoint = _circleLocalPosition.x + _intersectionSqrt;
+                        }
+
+                        if(_intersectionPoint < _distToClosestIntersectionPoint)
+                        {
+                            _distToClosestIntersectionPoint = _intersectionPoint;
+                            _closestIntersectingObstacle = obstacles[i];
+                            _localPosOfClosestObstacle = _circleLocalPosition;
+                        }
+                    }
+                }
             }
         }
 
-        return Vector3.zero;
+        _steeringForce = Vector3.zero;
+        if(_closestIntersectingObstacle != null)
+        {
+            _steeringForceMultiplier = 1f + (_boxLength - _localPosOfClosestObstacle.z) / _boxLength;
+
+            _steeringForce.x = (_closestIntersectingObstacle.Radius - _localPosOfClosestObstacle.x) * _steeringForceMultiplier;
+            _steeringForce.z = (_closestIntersectingObstacle.Radius - _localPosOfClosestObstacle.z) * _brakingWeight;
+        }
+
+        return _vehicle.transform.TransformPoint(_steeringForce);
+    }
+
+    private Ray[] _feelers;
+    private float _currentVehicleSpeed;
+    private int _closestWallIndex;
+    private Vector3 _closestPoint = Vector3.zero;
+    private Vector3 _closestWallNormal = Vector3.zero;
+    private RaycastHit _raycastHit;
+    public Vector3 WallAvoidance(SteeringWall[] walls)
+    {
+        _currentVehicleSpeed = _vehicle.Speed;
+        _distToClosestIntersectionPoint = float.MaxValue;
+        _closestWallIndex = -1;
+        _closestPoint = Vector3.zero;
+        _closestWallNormal = Vector3.zero;
+        _steeringForce = Vector3.zero;
+
+        for (int f = 0; f < _feelers.Length; f++)
+        {
+            for (int w = 0; w < walls.Length; w++)
+            {
+                if(walls[w].AttachedCollider.Raycast(_feelers[f], out _raycastHit, _currentVehicleSpeed))
+                {
+                    if(_raycastHit.distance < _distToClosestIntersectionPoint)
+                    {
+                        _distToClosestIntersectionPoint = _raycastHit.distance;
+                        _closestWallIndex = w;
+                        _closestPoint = _raycastHit.point;
+                        _closestWallNormal = _raycastHit.normal;
+                    }
+                }
+            }
+
+            if (_closestWallIndex >= 0)
+            {
+                Vector3 overShoot = _feelers[f].GetPoint(_currentVehicleSpeed) - _closestPoint;
+                _steeringForce = _closestWallNormal * overShoot.magnitude;
+            }
+        }
+
+        return _steeringForce;
+    }
+
+    private Quaternion _rotatedDirection;
+    private void CreateFeelers()
+    {
+        _feelers = new Ray[3];
+        //forward ray
+        _feelers[0] = new Ray(_vehicle.Position, _vehicle.transform.forward);
+
+        _rotatedDirection = _vehicle.transform.rotation;
+        _rotatedDirection *= Quaternion.Euler(_vehicle.transform.up * 40f);
+        _feelers[1] = new Ray(_vehicle.Position, _rotatedDirection.eulerAngles);
+
+        _rotatedDirection = _vehicle.transform.rotation;
+        _rotatedDirection *= Quaternion.Euler(_vehicle.transform.up * -40f);
+        _feelers[2] = new Ray(_vehicle.Position, _rotatedDirection.eulerAngles);
+    }
+
+    private Vector3 _midPoint;
+    private float _timeToReachMidPoint;
+    private Vector3 _futureAPosition;
+    private Vector3 _futureBPosition;
+    public Vector3 Interpose(Vehicle agentA, Vehicle agentB)
+    {
+        _midPoint = (agentA.Position + agentB.Position) / 2f;
+        _timeToReachMidPoint = Vector3.Distance(_vehicle.Position, _midPoint) / _vehicle.MaxSpeed;
+
+        _futureAPosition = agentA.Position + agentA.Velocity * _timeToReachMidPoint;
+        _futureBPosition = agentB.Position + agentB.Velocity * _timeToReachMidPoint;
+
+        _midPoint = (_futureAPosition + _futureBPosition) / 2f;
+
+        return Arrive(_midPoint, Deceleration.fast);
+    }
+
+    private float _distToClosest;
+    private Vector3 _bestHidingSpot;
+    private Vector3 _hidingSpot;
+    public Vector3 Hide(Vehicle target, SteeringObstacle[] obstacles)
+    {
+        _distToClosest = float.MaxValue;
+        _bestHidingSpot = Vector3.zero;
+
+        for (int i = 0; i < obstacles.Length; i++)
+        {
+            _hidingSpot = GetHidingPosition(obstacles[i].Position, obstacles[i].Radius, target.Position);
+
+            _distance = (_hidingSpot - _vehicle.Position).sqrMagnitude;
+            if(_distance < _distToClosest)
+            {
+                _distToClosest = _distance;
+                _bestHidingSpot = _hidingSpot;
+            }
+        }
+
+        if(_distToClosest == float.MaxValue)
+        {
+            return Evade(target);
+        }
+
+        return Arrive(_bestHidingSpot, Deceleration.fast);
+    }
+
+    private float _distanceFromObstacleBoundary = 5f;
+    private float _distAway;
+    private Vector3 _toObstacle;
+    private Vector3 GetHidingPosition(Vector3 obstaclePosition, float obstacleRadius, Vector3 targetPosition)
+    {
+        _distAway = obstacleRadius + _distanceFromObstacleBoundary;
+        _toObstacle = (obstaclePosition - targetPosition).normalized;
+
+        return (_toObstacle * _distAway) + obstaclePosition;
     }
 }

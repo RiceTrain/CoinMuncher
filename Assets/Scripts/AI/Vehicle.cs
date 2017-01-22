@@ -8,6 +8,11 @@ abstract public class Vehicle : MonoBehaviour {
     private Rigidbody AttachedRigidbody;
     internal SteeringBehaviours _steeringBehaviours;
 
+    public SteeringObstacleManager ObstacleManagerReference
+    {
+        get { return SteeringObstacleManager.Instance; }
+    }
+
     public Vector3 Position
     {
         get { return VehicleTransform.position; }
@@ -58,6 +63,13 @@ abstract public class Vehicle : MonoBehaviour {
     public float MaxForce
     {
         get { return maxForce; }
+    }
+
+    [SerializeField]
+    private float radius = 1f;
+    public float Radius
+    {
+        get { return radius; }
     }
 
     private void Awake()
