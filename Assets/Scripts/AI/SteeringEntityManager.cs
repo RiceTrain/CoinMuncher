@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class SteeringObstacleManager : MonoBehaviour {
+public class SteeringEntityManager : MonoBehaviour {
 
-    public static SteeringObstacleManager Instance { get; private set; }
+    public static SteeringEntityManager Instance { get; private set; }
 
     private SteeringObstacle[] _steeringObstacles;
     public SteeringObstacle[] SteeringObstacles
@@ -15,6 +15,12 @@ public class SteeringObstacleManager : MonoBehaviour {
     public SteeringWall[] SteeringWalls
     {
         get { return _steeringWalls; }
+    }
+
+    private List<Vehicle> _vehiclesInWorld;
+    public Vehicle[] VehiclesInWorld
+    {
+        get { return _vehiclesInWorld.ToArray(); }
     }
 
     private const string STEERING_OBSTACLE_TAG_NAME = "SteeringObstacle";
@@ -86,6 +92,27 @@ public class SteeringObstacleManager : MonoBehaviour {
             else
             {
                 _steeringObstacles[i].TaggedForAvoidance = false;
+            }
+        }
+    }
+    
+    public void TagVehiclesWithinNeighbourRadius(Vehicle vehicle, float neighbourRadius)
+    {
+        Vector3 to;
+        float range;
+        for (int i = 0; i < _vehiclesInWorld.Count; i++)
+        {
+            _vehiclesInWorld[i].TaggedForGroupBehaviours = false;
+
+            if (_vehiclesInWorld[i] != vehicle)
+            {
+                to = _vehiclesInWorld[i].Position - vehicle.Position;
+                range = neighbourRadius + _vehiclesInWorld[i].Radius;
+
+                if(to.sqrMagnitude < neighbourRadius * neighbourRadius)
+                {
+                    _vehiclesInWorld[i].TaggedForGroupBehaviours = true;
+                }
             }
         }
     }

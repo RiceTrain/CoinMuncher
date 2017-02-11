@@ -11,6 +11,11 @@ public class SteeringBehaviours {
         _vehicle = vehicleToControl;
     }
 
+    public Vector3 Calculate()
+    {
+        return Vector3.zero; //Implement partitioning of behaviours
+    }
+
     private Vector3 _desiredVelocity;
 	public Vector3 Seek(Vector3 targetPos)
     {
@@ -179,6 +184,7 @@ public class SteeringBehaviours {
         _closestWallNormal = Vector3.zero;
         _steeringForce = Vector3.zero;
 
+        CreateFeelers();
         for (int f = 0; f < _feelers.Length; f++)
         {
             for (int w = 0; w < walls.Length; w++)
@@ -275,5 +281,100 @@ public class SteeringBehaviours {
         _toObstacle = (obstaclePosition - targetPosition).normalized;
 
         return (_toObstacle * _distAway) + obstaclePosition;
+    }
+
+    private SteeringPath _currentPath;
+    private float _waypointDistSqr = 1f;
+    public Vector3 FollowPath()
+    {
+        if(Vector3.SqrMagnitude(_currentPath.CurrentWaypoint - _vehicle.Position) < _waypointDistSqr)
+        {
+            _currentPath.SetNextWaypoint();
+        }
+
+        if (!_currentPath.AtLastWaypoint())
+        {
+            return Seek(_currentPath.CurrentWaypoint);
+        }
+        else
+        {
+            return Arrive(_currentPath.CurrentWaypoint, Deceleration.normal);
+        }
+    }
+
+    private Vector3 _offsetWorldPosition;
+    public Vector3 OffsetPursuit(Vehicle leader, Vector3 offset)
+    {
+        _offsetWorldPosition = leader.transform.TransformPoint(offset);
+
+        _lookAheadTime = _offsetWorldPosition.magnitude / (_vehicle.MaxSpeed + leader.Speed);
+
+        return Arrive(_offsetWorldPosition + (leader.Velocity * _lookAheadTime), Deceleration.fast);
+    }
+
+    public Vector3 Separation(Vehicle[] neighbours)
+    {
+        _steeringForce = Vector3.zero;
+        for (int i = 0; i < neighbours.Length; i++)
+        {
+            if(neighbours[i] != _vehicle && neighbours[i].TaggedForGroupBehaviours)
+            {
+                _toTarget = _vehicle.Position - neighbours[i].Position;
+
+                _steeringForce += _toTarget.normalized / _toTarget.magnitude;
+            }
+        }
+
+        return _steeringForce;
+    }
+
+    private Vector3 _averageHeading;
+    private int _neighbourCount;
+    public Vector3 Alignment(Vehicle[] neighbours)
+    {
+        _averageHeading = Vector3.zero;
+        _neighbourCount = 0;
+
+        for (int i = 0; i < neighbours.Length; i++)
+        {
+            if (neighbours[i] != _vehicle && neighbours[i].TaggedForGroupBehaviours)
+            {
+                _averageHeading += neighbours[i].Heading;
+                _neighbourCount++;
+            }
+        }
+
+        if(_neighbourCount > 0)
+        {
+            _averageHeading /= (float)_neighbourCount;
+            _averageHeading -= _vehicle.Heading;
+        }
+
+        return _averageHeading;
+    }
+
+    private Vector3 _centerOfMass;
+    public Vector3 Cohesion(Vehicle[] neighbours)
+    {
+        _centerOfMass = Vector3.zero;
+        _steeringForce = Vector3.zero;
+        _neighbourCount = 0;
+
+        for (int i = 0; i < neighbours.Length; i++)
+        {
+            if (neighbours[i] != _vehicle && neighbours[i].TaggedForGroupBehaviours)
+            {
+                _centerOfMass += neighbours[i].Position;
+                _neighbourCount++;
+            }
+        }
+
+        if (_neighbourCount > 0)
+        {
+            _centerOfMass /= (float)_neighbourCount;
+            _steeringForce = Seek(_centerOfMass);
+        }
+
+        return _steeringForce;
     }
 }

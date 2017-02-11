@@ -8,9 +8,9 @@ abstract public class Vehicle : MonoBehaviour {
     private Rigidbody AttachedRigidbody;
     internal SteeringBehaviours _steeringBehaviours;
 
-    public SteeringObstacleManager ObstacleManagerReference
+    public SteeringEntityManager ObstacleManagerReference
     {
-        get { return SteeringObstacleManager.Instance; }
+        get { return SteeringEntityManager.Instance; }
     }
 
     public Vector3 Position
@@ -70,6 +70,13 @@ abstract public class Vehicle : MonoBehaviour {
     public float Radius
     {
         get { return radius; }
+    }
+
+    private bool _taggedForGroupBehaviours;
+    public bool TaggedForGroupBehaviours
+    {
+        get { return _taggedForGroupBehaviours; }
+        set { _taggedForGroupBehaviours = value; }
     }
 
     private void Awake()

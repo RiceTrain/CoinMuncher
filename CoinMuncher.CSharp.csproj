@@ -74,6 +74,12 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\AI\State.cs" />
     <Compile Include="Assets\Scripts\AI\StateMachine.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringEntityManager.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringObstacle.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringPath.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringWall.cs" />
+    <Compile Include="Assets\Scripts\AI\Vehicle.cs" />
     <Compile Include="Assets\Scripts\Camera\PlayerFollowCamera.cs" />
     <Compile Include="Assets\Scripts\Player\DistanceTagScript.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
