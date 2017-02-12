@@ -74,7 +74,22 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\AI\State.cs" />
     <Compile Include="Assets\Scripts\AI\StateMachine.cs" />
-    <Compile Include="Assets\Scripts\AI\SteeringBehaviours.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\Alignment.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\Arrive.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\Cohesion.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\Evade.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\Flee.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\FollowPath.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\Hide.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\Interpose.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\ObstacleAvoidance.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\OffsetPursuit.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\Pursuit.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\Seek.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\Separation.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\SteeringBehaviours.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\WallAvoidance.cs" />
+    <Compile Include="Assets\Scripts\AI\SteeringBehaviours\Wander.cs" />
     <Compile Include="Assets\Scripts\AI\SteeringEntityManager.cs" />
     <Compile Include="Assets\Scripts\AI\SteeringObstacle.cs" />
     <Compile Include="Assets\Scripts\AI\SteeringPath.cs" />

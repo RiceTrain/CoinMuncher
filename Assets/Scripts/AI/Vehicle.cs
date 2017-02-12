@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 [RequireComponent(typeof(Rigidbody))]
-abstract public class Vehicle : MonoBehaviour {
+public class Vehicle : MonoBehaviour {
 
-    private Transform VehicleTransform;
-    private Rigidbody AttachedRigidbody;
-    internal SteeringBehaviours _steeringBehaviours;
+    private Transform _vehicleTransform;
+    private Rigidbody _attachedRigidbody;
+    private SteeringBehaviours _steeringBehaviours;
 
     public SteeringEntityManager ObstacleManagerReference
     {
@@ -15,18 +14,18 @@ abstract public class Vehicle : MonoBehaviour {
 
     public Vector3 Position
     {
-        get { return VehicleTransform.position; }
+        get { return _vehicleTransform.position; }
     }
 
     public Vector3 Velocity
     {
-        get { return AttachedRigidbody.velocity; }
-        set { AttachedRigidbody.velocity = value; }
+        get { return _attachedRigidbody.velocity; }
+        set { _attachedRigidbody.velocity = value; }
     }
 
     public float Speed
     {
-        get { return AttachedRigidbody.velocity.magnitude; }
+        get { return _attachedRigidbody.velocity.magnitude; }
     }
 
     private Vector3 _heading;
@@ -43,12 +42,12 @@ abstract public class Vehicle : MonoBehaviour {
 
     private float _mass
     {
-        get { return AttachedRigidbody.mass; }
+        get { return _attachedRigidbody.mass; }
     }
 
     private float _maxTurnRate
     {
-        get { return AttachedRigidbody.maxAngularVelocity; }
+        get { return _attachedRigidbody.maxAngularVelocity; }
     }
     
     [SerializeField]
@@ -72,6 +71,15 @@ abstract public class Vehicle : MonoBehaviour {
         get { return radius; }
     }
 
+    [SerializeField]
+    private SteeringBehaviours.UpdateTypes _steeringUpdateMethod = SteeringBehaviours.UpdateTypes.WeightedTruncatedSum;
+
+    [SerializeField]
+    private SteeringBehaviours.BehaviourModifiers _steeringBehaviourWeights;
+
+    [SerializeField]
+    private float _neighbourhoodRadius = 2f;
+
     private bool _taggedForGroupBehaviours;
     public bool TaggedForGroupBehaviours
     {
@@ -81,17 +89,22 @@ abstract public class Vehicle : MonoBehaviour {
 
     private void Awake()
     {
-        VehicleTransform = GetComponent<Transform>();
-        AttachedRigidbody = GetComponent<Rigidbody>();
+        _vehicleTransform = GetComponent<Transform>();
+        _attachedRigidbody = GetComponent<Rigidbody>();
 
-        _steeringBehaviours.Init(this);
+        InitialiseSteeringBehaviours();
+    }
+
+    protected virtual void InitialiseSteeringBehaviours()
+    {
+        _steeringBehaviours = new SteeringBehaviours(this, _steeringUpdateMethod, _steeringBehaviourWeights, _neighbourhoodRadius);
     }
 
     private Vector3 _steeringForce = Vector3.zero;
     private Vector3 _acceleration = Vector3.zero;
     private void Update()
     {
-        _steeringForce = UpdateSteering();
+        _steeringForce = _steeringBehaviours.Calculate();
 
         _acceleration = _steeringForce / _mass;
 
@@ -100,10 +113,8 @@ abstract public class Vehicle : MonoBehaviour {
 
         if(Velocity.sqrMagnitude > 0.00000001f)
         {
-            _heading = AttachedRigidbody.velocity.normalized;
-            _side = Vector3.Cross(AttachedRigidbody.velocity.normalized, VehicleTransform.up);
+            _heading = _attachedRigidbody.velocity.normalized;
+            _side = Vector3.Cross(_attachedRigidbody.velocity.normalized, _vehicleTransform.up);
         }
     }
-
-    abstract protected Vector3 UpdateSteering();
 }

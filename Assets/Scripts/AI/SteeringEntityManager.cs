@@ -5,23 +5,11 @@ public class SteeringEntityManager : MonoBehaviour {
 
     public static SteeringEntityManager Instance { get; private set; }
 
-    private SteeringObstacle[] _steeringObstacles;
-    public SteeringObstacle[] SteeringObstacles
-    {
-        get { return _steeringObstacles; }
-    }
+    public SteeringObstacle[] SteeringObstacles;
 
-    private SteeringWall[] _steeringWalls;
-    public SteeringWall[] SteeringWalls
-    {
-        get { return _steeringWalls; }
-    }
+    public SteeringWall[] SteeringWalls;
 
-    private List<Vehicle> _vehiclesInWorld;
-    public Vehicle[] VehiclesInWorld
-    {
-        get { return _vehiclesInWorld.ToArray(); }
-    }
+    public Vehicle[] VehiclesInWorld;
 
     private const string STEERING_OBSTACLE_TAG_NAME = "SteeringObstacle";
     private const string STEERING_WALL_TAG_NAME = "SteeringWall";
@@ -33,8 +21,8 @@ public class SteeringEntityManager : MonoBehaviour {
             Instance = this;
         }
 
-        _steeringObstacles = GetSteeringObstaclesFromScene();
-        _steeringWalls = GetSteeringWallsFromScene();
+        SteeringObstacles = GetSteeringObstaclesFromScene();
+        SteeringWalls = GetSteeringWallsFromScene();
     }
 
     private SteeringObstacle[] GetSteeringObstaclesFromScene()
@@ -59,7 +47,7 @@ public class SteeringEntityManager : MonoBehaviour {
         return validObstacles.ToArray();
     }
 
-    public SteeringWall[] GetSteeringWallsFromScene()
+    private SteeringWall[] GetSteeringWallsFromScene()
     {
         GameObject[] taggedGameObjects = GameObject.FindGameObjectsWithTag(STEERING_WALL_TAG_NAME);
         List<SteeringWall> validWalls = new List<SteeringWall>();
@@ -83,15 +71,15 @@ public class SteeringEntityManager : MonoBehaviour {
 
     public void TagObstaclesWithinRange(Vehicle vehicle, float boxLength)
     {
-        for (int i = 0; i < _steeringObstacles.Length; i++)
+        for (int i = 0; i < SteeringObstacles.Length; i++)
         {
-            if(Vector3.SqrMagnitude(vehicle.Position - _steeringObstacles[i].Position) <= boxLength * boxLength)
+            if(Vector3.SqrMagnitude(vehicle.Position - SteeringObstacles[i].Position) <= boxLength * boxLength)
             {
-                _steeringObstacles[i].TaggedForAvoidance = true;
+                SteeringObstacles[i].TaggedForAvoidance = true;
             }
             else
             {
-                _steeringObstacles[i].TaggedForAvoidance = false;
+                SteeringObstacles[i].TaggedForAvoidance = false;
             }
         }
     }
@@ -100,18 +88,18 @@ public class SteeringEntityManager : MonoBehaviour {
     {
         Vector3 to;
         float range;
-        for (int i = 0; i < _vehiclesInWorld.Count; i++)
+        for (int i = 0; i < VehiclesInWorld.Length; i++)
         {
-            _vehiclesInWorld[i].TaggedForGroupBehaviours = false;
+            VehiclesInWorld[i].TaggedForGroupBehaviours = false;
 
-            if (_vehiclesInWorld[i] != vehicle)
+            if (VehiclesInWorld[i] != vehicle)
             {
-                to = _vehiclesInWorld[i].Position - vehicle.Position;
-                range = neighbourRadius + _vehiclesInWorld[i].Radius;
+                to = VehiclesInWorld[i].Position - vehicle.Position;
+                range = neighbourRadius + VehiclesInWorld[i].Radius;
 
-                if(to.sqrMagnitude < neighbourRadius * neighbourRadius)
+                if(to.sqrMagnitude < range * range)
                 {
-                    _vehiclesInWorld[i].TaggedForGroupBehaviours = true;
+                    VehiclesInWorld[i].TaggedForGroupBehaviours = true;
                 }
             }
         }
