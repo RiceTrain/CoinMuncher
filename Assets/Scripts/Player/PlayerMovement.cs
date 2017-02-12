@@ -3,6 +3,8 @@ using System.Collections;
 
 public class PlayerMovement : MonoBehaviour {
 
+    public static PlayerMovement Instance;
+
     [SerializeField]
     private float MovementSpeed = 5f;
 
@@ -11,6 +13,11 @@ public class PlayerMovement : MonoBehaviour {
 
     private void Awake()
     {
+        if(Instance == null)
+        {
+            Instance = this;
+        }
+
         _playerTransform = transform;
         _movementController = GetComponent<CharacterController>();
     }

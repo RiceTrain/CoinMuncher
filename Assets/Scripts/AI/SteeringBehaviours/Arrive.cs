@@ -25,7 +25,7 @@ public class Arrive {
             _speed = _distance / ((float)deceleration * decelerationTweaker);
             _speed = Mathf.Min(_speed, _vehicle.MaxSpeed);
 
-            _desiredVelocity = _toTarget * (_speed / _distance);
+            _desiredVelocity = _toTarget * _speed / _distance;
 
             return _desiredVelocity - _vehicle.Velocity;
         }

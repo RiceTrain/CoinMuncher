@@ -173,11 +173,11 @@ public class SteeringBehaviours {
         }
         if (ObstacleAvoidanceActivated)
         {
-            _steeringForce += _obstacleAvoidanceBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.SteeringObstacles) * _behaviourModifiers.ObstacleAvoidanceWeight;
+            _steeringForce += _obstacleAvoidanceBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.SteeringObstacles) * _behaviourModifiers.ObstacleAvoidanceWeight;
         }
         if (WallAvoidanceActivated)
         {
-            _steeringForce += _wallAvoidanceBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.SteeringWalls) * _behaviourModifiers.WallAvoidanceWeight;
+            _steeringForce += _wallAvoidanceBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.SteeringWalls) * _behaviourModifiers.WallAvoidanceWeight;
         }
         if (InterposeActivated)
         {
@@ -185,7 +185,7 @@ public class SteeringBehaviours {
         }
         if (HideActivated)
         {
-            _steeringForce += _hideBehaviour.Calculate(_hideTarget, ref _vehicle.ObstacleManagerReference.SteeringObstacles) * _behaviourModifiers.HideWeight;
+            _steeringForce += _hideBehaviour.Calculate(_hideTarget, ref _vehicle.SteeringEntityManagerReference.SteeringObstacles) * _behaviourModifiers.HideWeight;
         }
         if (FollowPathActivated)
         {
@@ -198,20 +198,20 @@ public class SteeringBehaviours {
 
         if (SeparationActivated || AlignmentActivated || CohesionActivated)
         {
-            _vehicle.ObstacleManagerReference.TagVehiclesWithinNeighbourRadius(_vehicle, _neighbourhoodRadius);
+            _vehicle.SteeringEntityManagerReference.TagVehiclesWithinNeighbourRadius(_vehicle, _neighbourhoodRadius);
         }
 
         if (SeparationActivated)
         {
-            _steeringForce += _separationBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.VehiclesInWorld) * _behaviourModifiers.SeparationWeight;
+            _steeringForce += _separationBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.VehiclesInWorld) * _behaviourModifiers.SeparationWeight;
         }
         if (AlignmentActivated)
         {
-            _steeringForce += _alignmentBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.VehiclesInWorld) * _behaviourModifiers.AlignmentWeight;
+            _steeringForce += _alignmentBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.VehiclesInWorld) * _behaviourModifiers.AlignmentWeight;
         }
         if (CohesionActivated)
         {
-            _steeringForce += _cohesionBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.VehiclesInWorld) * _behaviourModifiers.CohesionWeight;
+            _steeringForce += _cohesionBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.VehiclesInWorld) * _behaviourModifiers.CohesionWeight;
         }
 
         return Vector3.ClampMagnitude(_steeringForce, _vehicle.MaxForce);
@@ -269,7 +269,7 @@ public class SteeringBehaviours {
         }
         if (ObstacleAvoidanceActivated)
         {
-            _currentForce = _obstacleAvoidanceBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.SteeringObstacles) * _behaviourModifiers.ObstacleAvoidanceWeight;
+            _currentForce = _obstacleAvoidanceBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.SteeringObstacles) * _behaviourModifiers.ObstacleAvoidanceWeight;
 
             if (!AccumulateForce(_currentForce))
             {
@@ -278,7 +278,7 @@ public class SteeringBehaviours {
         }
         if (WallAvoidanceActivated)
         {
-            _currentForce = _wallAvoidanceBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.SteeringWalls) * _behaviourModifiers.WallAvoidanceWeight;
+            _currentForce = _wallAvoidanceBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.SteeringWalls) * _behaviourModifiers.WallAvoidanceWeight;
 
             if (!AccumulateForce(_currentForce))
             {
@@ -296,7 +296,7 @@ public class SteeringBehaviours {
         }
         if (HideActivated)
         {
-            _currentForce = _hideBehaviour.Calculate(_hideTarget, ref _vehicle.ObstacleManagerReference.SteeringObstacles) * _behaviourModifiers.HideWeight;
+            _currentForce = _hideBehaviour.Calculate(_hideTarget, ref _vehicle.SteeringEntityManagerReference.SteeringObstacles) * _behaviourModifiers.HideWeight;
 
             if (!AccumulateForce(_currentForce))
             {
@@ -324,12 +324,12 @@ public class SteeringBehaviours {
 
         if (SeparationActivated || AlignmentActivated || CohesionActivated)
         {
-            _vehicle.ObstacleManagerReference.TagVehiclesWithinNeighbourRadius(_vehicle, _neighbourhoodRadius);
+            _vehicle.SteeringEntityManagerReference.TagVehiclesWithinNeighbourRadius(_vehicle, _neighbourhoodRadius);
         }
 
         if (SeparationActivated)
         {
-            _currentForce = _separationBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.VehiclesInWorld) * _behaviourModifiers.SeparationWeight;
+            _currentForce = _separationBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.VehiclesInWorld) * _behaviourModifiers.SeparationWeight;
 
             if (!AccumulateForce(_currentForce))
             {
@@ -338,7 +338,7 @@ public class SteeringBehaviours {
         }
         if (AlignmentActivated)
         {
-            _currentForce = _alignmentBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.VehiclesInWorld) * _behaviourModifiers.AlignmentWeight;
+            _currentForce = _alignmentBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.VehiclesInWorld) * _behaviourModifiers.AlignmentWeight;
 
             if (!AccumulateForce(_currentForce))
             {
@@ -347,7 +347,7 @@ public class SteeringBehaviours {
         }
         if (CohesionActivated)
         {
-            _currentForce = _cohesionBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.VehiclesInWorld) * _behaviourModifiers.CohesionWeight;
+            _currentForce = _cohesionBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.VehiclesInWorld) * _behaviourModifiers.CohesionWeight;
 
             if (!AccumulateForce(_currentForce))
             {
@@ -436,7 +436,7 @@ public class SteeringBehaviours {
         }
         if (ObstacleAvoidanceActivated && _behaviourModifiers.ObstacleAvoidanceProbability > Random.value)
         {
-            _steeringForce = _obstacleAvoidanceBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.SteeringObstacles) * _behaviourModifiers.ObstacleAvoidanceWeight / _behaviourModifiers.ObstacleAvoidanceProbability;
+            _steeringForce = _obstacleAvoidanceBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.SteeringObstacles) * _behaviourModifiers.ObstacleAvoidanceWeight / _behaviourModifiers.ObstacleAvoidanceProbability;
 
             if (_steeringForce != Vector3.zero)
             {
@@ -445,7 +445,7 @@ public class SteeringBehaviours {
         }
         if (WallAvoidanceActivated && _behaviourModifiers.WallAvoidanceProbability > Random.value)
         {
-            _steeringForce = _wallAvoidanceBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.SteeringWalls) * _behaviourModifiers.WallAvoidanceWeight / _behaviourModifiers.WallAvoidanceProbability;
+            _steeringForce = _wallAvoidanceBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.SteeringWalls) * _behaviourModifiers.WallAvoidanceWeight / _behaviourModifiers.WallAvoidanceProbability;
 
             if (_steeringForce != Vector3.zero)
             {
@@ -463,7 +463,7 @@ public class SteeringBehaviours {
         }
         if (HideActivated && _behaviourModifiers.HideProbability > Random.value)
         {
-            _steeringForce = _hideBehaviour.Calculate(_hideTarget, ref _vehicle.ObstacleManagerReference.SteeringObstacles) * _behaviourModifiers.HideWeight / _behaviourModifiers.HideProbability;
+            _steeringForce = _hideBehaviour.Calculate(_hideTarget, ref _vehicle.SteeringEntityManagerReference.SteeringObstacles) * _behaviourModifiers.HideWeight / _behaviourModifiers.HideProbability;
 
             if (_steeringForce != Vector3.zero)
             {
@@ -491,12 +491,12 @@ public class SteeringBehaviours {
 
         if (SeparationActivated || AlignmentActivated || CohesionActivated)
         {
-            _vehicle.ObstacleManagerReference.TagVehiclesWithinNeighbourRadius(_vehicle, _neighbourhoodRadius);
+            _vehicle.SteeringEntityManagerReference.TagVehiclesWithinNeighbourRadius(_vehicle, _neighbourhoodRadius);
         }
 
         if (SeparationActivated && _behaviourModifiers.SeparationProbability > Random.value)
         {
-            _steeringForce = _separationBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.VehiclesInWorld) * _behaviourModifiers.SeparationWeight / _behaviourModifiers.SeparationProbability;
+            _steeringForce = _separationBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.VehiclesInWorld) * _behaviourModifiers.SeparationWeight / _behaviourModifiers.SeparationProbability;
 
             if (_steeringForce != Vector3.zero)
             {
@@ -505,7 +505,7 @@ public class SteeringBehaviours {
         }
         if (AlignmentActivated && _behaviourModifiers.AlignmentProbability > Random.value)
         {
-            _steeringForce = _alignmentBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.VehiclesInWorld) * _behaviourModifiers.AlignmentWeight / _behaviourModifiers.AlignmentProbability;
+            _steeringForce = _alignmentBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.VehiclesInWorld) * _behaviourModifiers.AlignmentWeight / _behaviourModifiers.AlignmentProbability;
 
             if (_steeringForce != Vector3.zero)
             {
@@ -514,7 +514,7 @@ public class SteeringBehaviours {
         }
         if (CohesionActivated && _behaviourModifiers.CohesionProbability > Random.value)
         {
-            _steeringForce = _cohesionBehaviour.Calculate(ref _vehicle.ObstacleManagerReference.VehiclesInWorld) * _behaviourModifiers.CohesionWeight / _behaviourModifiers.CohesionProbability;
+            _steeringForce = _cohesionBehaviour.Calculate(ref _vehicle.SteeringEntityManagerReference.VehiclesInWorld) * _behaviourModifiers.CohesionWeight / _behaviourModifiers.CohesionProbability;
 
             if (_steeringForce != Vector3.zero)
             {

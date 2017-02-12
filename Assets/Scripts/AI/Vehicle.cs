@@ -5,9 +5,9 @@ public class Vehicle : MonoBehaviour {
 
     private Transform _vehicleTransform;
     private Rigidbody _attachedRigidbody;
-    private SteeringBehaviours _steeringBehaviours;
+    protected SteeringBehaviours _steeringBehaviours;
 
-    public SteeringEntityManager ObstacleManagerReference
+    public SteeringEntityManager SteeringEntityManagerReference
     {
         get { return SteeringEntityManager.Instance; }
     }
@@ -65,6 +65,9 @@ public class Vehicle : MonoBehaviour {
     }
 
     [SerializeField]
+    private float turnSpeed = 5f;
+
+    [SerializeField]
     private float radius = 1f;
     public float Radius
     {
@@ -72,10 +75,10 @@ public class Vehicle : MonoBehaviour {
     }
 
     [SerializeField]
-    private SteeringBehaviours.UpdateTypes _steeringUpdateMethod = SteeringBehaviours.UpdateTypes.WeightedTruncatedSum;
+    private SteeringBehaviours.UpdateTypes _steeringUpdateMethod = SteeringBehaviours.UpdateTypes.WeightedTruncatedSumWithPrioritisation;
 
     [SerializeField]
-    private SteeringBehaviours.BehaviourModifiers _steeringBehaviourWeights;
+    private SteeringBehaviours.BehaviourModifiers _steeringBehaviourModifiers;
 
     [SerializeField]
     private float _neighbourhoodRadius = 2f;
@@ -91,13 +94,16 @@ public class Vehicle : MonoBehaviour {
     {
         _vehicleTransform = GetComponent<Transform>();
         _attachedRigidbody = GetComponent<Rigidbody>();
+    }
 
+    private void Start()
+    {
         InitialiseSteeringBehaviours();
     }
 
     protected virtual void InitialiseSteeringBehaviours()
     {
-        _steeringBehaviours = new SteeringBehaviours(this, _steeringUpdateMethod, _steeringBehaviourWeights, _neighbourhoodRadius);
+        _steeringBehaviours = new SteeringBehaviours(this, _steeringUpdateMethod, _steeringBehaviourModifiers, _neighbourhoodRadius);
     }
 
     private Vector3 _steeringForce = Vector3.zero;
@@ -113,7 +119,7 @@ public class Vehicle : MonoBehaviour {
 
         if(Velocity.sqrMagnitude > 0.00000001f)
         {
-            _heading = _attachedRigidbody.velocity.normalized;
+            _heading = Velocity.normalized;
             _side = Vector3.Cross(_attachedRigidbody.velocity.normalized, _vehicleTransform.up);
         }
     }

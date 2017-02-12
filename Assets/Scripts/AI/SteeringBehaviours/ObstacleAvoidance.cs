@@ -28,7 +28,7 @@ public class ObstacleAvoidance {
         _boxLength = _minDetectionBoxLength + (_vehicle.Speed / _vehicle.MaxSpeed) * _minDetectionBoxLength;
 
         //Tag obstacles in the range of the box
-        _vehicle.ObstacleManagerReference.TagObstaclesWithinRange(_vehicle, _boxLength);
+        _vehicle.SteeringEntityManagerReference.TagObstaclesWithinRange(_vehicle, _boxLength);
 
         _closestIntersectingObstacle = null;
         _distToClosestIntersectionPoint = float.MaxValue;

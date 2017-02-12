@@ -94,6 +94,7 @@
     <Compile Include="Assets\Scripts\AI\SteeringObstacle.cs" />
     <Compile Include="Assets\Scripts\AI\SteeringPath.cs" />
     <Compile Include="Assets\Scripts\AI\SteeringWall.cs" />
+    <Compile Include="Assets\Scripts\AI\TestVehicle.cs" />
     <Compile Include="Assets\Scripts\AI\Vehicle.cs" />
     <Compile Include="Assets\Scripts\Camera\PlayerFollowCamera.cs" />
     <Compile Include="Assets\Scripts\Player\DistanceTagScript.cs" />
